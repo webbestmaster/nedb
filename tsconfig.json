@@ -41,7 +41,6 @@
     },
     "exclude": [
         "./dist/",
-        "./dist-server/",
         "./tsc-check/",
         "./node_modules/",
     ]
