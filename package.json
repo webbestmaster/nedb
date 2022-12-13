@@ -69,7 +69,8 @@
     "tsc": "tsc -p ./tsconfig.json",
     "tsc:watch": "tsc -p ./tsconfig.json --watch",
     "ts-coverage": "typescript-coverage-report --threshold=100 --strict=true --project ./src",
-    "test:unit": "jest --config='test-unit/config/jest.config.js' ./src/ --coverage --silent --passWithNoTests",
+    "test:unit:full": "jest --config='test-unit/config/jest.config.js' ./ --coverage --silent --passWithNoTests",
+    "test:unit": "jest --config='test-unit/config/jest.config.js' ./test/cursor.test.ts --silent --passWithNoTests",
 
     "__old__test": "mocha --reporter spec --timeout 10000"
   },
