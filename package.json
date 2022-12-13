@@ -70,10 +70,11 @@
     "tsc:watch": "tsc -p ./tsconfig.json --watch",
     "ts-coverage": "typescript-coverage-report --threshold=100 --strict=true --project ./src",
     "test:unit:full": "jest --config='test-unit/config/jest.config.js' ./ --coverage --silent --passWithNoTests",
-    "test:unit": "jest --config='test-unit/config/jest.config.js' ./test/cursor.test.ts ./test/customUtil.test.ts --silent --passWithNoTests",
-    "test:watch": "jest --config='test-unit/config/jest.config.js' ./test/customUtil.test.ts --silent --passWithNoTests --watch",
+    "test:unit": "jest --config='test-unit/config/jest.config.js' ./test/cursor.test.ts ./test/customUtil.test.ts ./test/persistence.test.ts --silent --passWithNoTests",
+    "test:watch": "jest --config='test-unit/config/jest.config.js' ./test/persistence.test.ts --silent --passWithNoTests --watch",
 
-    "__old__test": "mocha --reporter spec --timeout 10000"
+    "__old__test": "mocha --reporter spec --timeout 10000",
+    "__old__test-one": "mocha --reporter spec --timeout 10000 ./test_lac/loadAndCrash.test.js"
   },
   "main": "index",
   "__old__browser": {

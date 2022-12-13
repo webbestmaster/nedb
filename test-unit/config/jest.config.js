@@ -10,5 +10,5 @@ module.exports = {
     testEnvironment: 'node',
     // maxConcurrency: 1,
     // maxWorkers: 1,
-    testTimeout: 1e3,
+    testTimeout: 10e3,
 };
