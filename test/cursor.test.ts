@@ -3,7 +3,7 @@
 import assert from 'node:assert/strict';
 import fs from 'fs';
 import path from 'path';
-import {expect, describe, it, beforeEach} from '@jest/globals';
+import {describe, test, beforeEach} from '@jest/globals';
 import _ from 'underscore';
 import async from 'async';
 import model from './../lib/model';
@@ -61,7 +61,7 @@ describe('Cursor', function () {
             });
         });
 
-        it('Without query, an empty query or a simple query and no skip or limit', function (done) {
+        test('Without query, an empty query or a simple query and no skip or limit', function (done) {
             async.waterfall(
                 [
                     function (cb) {
@@ -106,7 +106,7 @@ describe('Cursor', function () {
             );
         });
 
-        it('With an empty collection', function (done) {
+        test('With an empty collection', function (done) {
             async.waterfall(
                 [
                     function (cb) {
@@ -127,7 +127,7 @@ describe('Cursor', function () {
             );
         });
 
-        it('With a limit', function (done) {
+        test('With a limit', function (done) {
             var cursor = new Cursor(d);
             cursor.limit(3);
             cursor.exec(function (err, docs) {
@@ -138,7 +138,7 @@ describe('Cursor', function () {
             });
         });
 
-        it('With a skip', function (done) {
+        test('With a skip', function (done) {
             var cursor = new Cursor(d);
             cursor.skip(2).exec(function (err, docs) {
                 assert.equal(err, null);
@@ -148,7 +148,7 @@ describe('Cursor', function () {
             });
         });
 
-        it('With a limit and a skip and method chaining', function (done) {
+        test('With a limit and a skip and method chaining', function (done) {
             var cursor = new Cursor(d);
             cursor.limit(4).skip(3); // Only way to know that the right number of results was skipped is if limit + skip > number of results
             cursor.exec(function (err, docs) {
@@ -176,7 +176,7 @@ describe('Cursor', function () {
             });
         });
 
-        it('Using one sort', function (done) {
+        test('Using one sort', function (done) {
             var cursor, i;
 
             cursor = new Cursor(d, {});
@@ -201,7 +201,7 @@ describe('Cursor', function () {
             });
         });
 
-        it('Sorting strings with custom string comparison function', function (done) {
+        test('Sorting strings with custom string comparison function', function (done) {
             var db = new Datastore({
                 inMemoryOnly: true,
                 autoload: true,
@@ -234,7 +234,7 @@ describe('Cursor', function () {
                 });
         });
 
-        it('With an empty collection', function (done) {
+        test('With an empty collection', function (done) {
             async.waterfall(
                 [
                     function (cb) {
@@ -256,7 +256,7 @@ describe('Cursor', function () {
             );
         });
 
-        it('Ability to chain sorting and exec', function (done) {
+        test('Ability to chain sorting and exec', function (done) {
             var i;
             async.waterfall(
                 [
@@ -287,7 +287,7 @@ describe('Cursor', function () {
             );
         });
 
-        it('Using limit and sort', function (done) {
+        test('Using limit and sort', function (done) {
             var i;
             async.waterfall(
                 [
@@ -323,7 +323,7 @@ describe('Cursor', function () {
             );
         });
 
-        it('Using a limit higher than total number of docs shouldnt cause an error', function (done) {
+        test('Using a limit higher than total number of docs shouldnt cause an error', function (done) {
             var i;
             async.waterfall(
                 [
@@ -348,7 +348,7 @@ describe('Cursor', function () {
             );
         });
 
-        it('Using limit and skip with sort', function (done) {
+        test('Using limit and skip with sort', function (done) {
             var i;
             async.waterfall(
                 [
@@ -399,7 +399,7 @@ describe('Cursor', function () {
             );
         });
 
-        it('Using too big a limit and a skip with sort', function (done) {
+        test('Using too big a limit and a skip with sort', function (done) {
             var i;
             async.waterfall(
                 [
@@ -423,7 +423,7 @@ describe('Cursor', function () {
             );
         });
 
-        it('Using too big a skip with sort should return no result', function (done) {
+        test('Using too big a skip with sort should return no result', function (done) {
             var i;
             async.waterfall(
                 [
@@ -478,7 +478,7 @@ describe('Cursor', function () {
             );
         });
 
-        it('Sorting strings', function (done) {
+        test('Sorting strings', function (done) {
             async.waterfall(
                 [
                     function (cb) {
@@ -521,7 +521,7 @@ describe('Cursor', function () {
             );
         });
 
-        it('Sorting nested fields with dates', function (done) {
+        test('Sorting nested fields with dates', function (done) {
             var doc1, doc2, doc3;
 
             async.waterfall(
@@ -569,7 +569,7 @@ describe('Cursor', function () {
             );
         });
 
-        it('Sorting when some fields are undefined', function (done) {
+        test('Sorting when some fields are undefined', function (done) {
             async.waterfall(
                 [
                     function (cb) {
@@ -620,7 +620,7 @@ describe('Cursor', function () {
             );
         });
 
-        it('Sorting when all fields are undefined', function (done) {
+        test('Sorting when all fields are undefined', function (done) {
             async.waterfall(
                 [
                     function (cb) {
@@ -657,7 +657,7 @@ describe('Cursor', function () {
             );
         });
 
-        it('Multiple consecutive sorts', function (done) {
+        test('Multiple consecutive sorts', function (done) {
             async.waterfall(
                 [
                     function (cb) {
@@ -736,7 +736,7 @@ describe('Cursor', function () {
             );
         });
 
-        it('Similar data, multiple consecutive sorts', function (done) {
+        test('Similar data, multiple consecutive sorts', function (done) {
             var i,
                 j,
                 id,
@@ -826,7 +826,7 @@ describe('Cursor', function () {
             });
         });
 
-        it('Takes all results if no projection or empty object given', function (done) {
+        test('Takes all results if no projection or empty object given', function (done) {
             var cursor = new Cursor(d, {});
             cursor.sort({age: 1}); // For easier finding
             cursor.exec(function (err, docs) {
@@ -853,7 +853,7 @@ describe('Cursor', function () {
             });
         });
 
-        it('Can take only the expected fields', function (done) {
+        test('Can take only the expected fields', function (done) {
             var cursor = new Cursor(d, {});
             cursor.sort({age: 1}); // For easier finding
             cursor.projection({age: 1, name: 1});
@@ -882,7 +882,7 @@ describe('Cursor', function () {
             });
         });
 
-        it('Can omit only the expected fields', function (done) {
+        test('Can omit only the expected fields', function (done) {
             var cursor = new Cursor(d, {});
             cursor.sort({age: 1}); // For easier finding
             cursor.projection({age: 0, name: 0});
@@ -911,7 +911,7 @@ describe('Cursor', function () {
             });
         });
 
-        it('Cannot use both modes except for _id', function (done) {
+        test('Cannot use both modes except for _id', function (done) {
             var cursor = new Cursor(d, {});
             cursor.sort({age: 1}); // For easier finding
             cursor.projection({age: 1, name: 0});
@@ -943,7 +943,7 @@ describe('Cursor', function () {
             });
         });
 
-        it('Projections on embedded documents - omit type', function (done) {
+        test('Projections on embedded documents - omit type', function (done) {
             var cursor = new Cursor(d, {});
             cursor.sort({age: 1}); // For easier finding
             cursor.projection({name: 0, planet: 0, 'toys.bebe': 0, _id: 0});
@@ -958,7 +958,7 @@ describe('Cursor', function () {
             });
         });
 
-        it('Projections on embedded documents - pick type', function (done) {
+        test('Projections on embedded documents - pick type', function (done) {
             var cursor = new Cursor(d, {});
             cursor.sort({age: 1}); // For easier finding
             cursor.projection({name: 1, 'toys.ballon': 1, _id: 0});
