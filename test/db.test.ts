@@ -436,21 +436,26 @@ describe('Database', function () {
          *
          * Note: maybe using an in-memory only NeDB would give us an easier solution
          */
-        test.skip('If the callback throws an uncaught exception, do not catch it inside findOne, this is userspace concern', function (done) {
+        test.only('If the callback throws an uncaught exception, do not catch it inside findOne, this is userspace concern', function (done) {
             var tryCount = 0,
                 currentUncaughtExceptionHandlers = process.listeners('uncaughtException'),
                 i;
 
+            console.log(currentUncaughtExceptionHandlers.length)
+
             process.removeAllListeners('uncaughtException');
 
             process.on('uncaughtException', function MINE(ex) {
+
+                console.error('///////// uncaughtException')
+
                 process.removeAllListeners('uncaughtException');
 
                 for (i = 0; i < currentUncaughtExceptionHandlers.length; i += 1) {
                     process.on('uncaughtException', currentUncaughtExceptionHandlers[i]);
                 }
 
-                assert.equal(ex.message, 'SOME EXCEPTION');
+                // assert.equal(ex.message, 'SOME EXCEPTION');
                 done();
             });
 
@@ -458,6 +463,9 @@ describe('Database', function () {
                 d.findOne({a: 5}, function (err, doc) {
                     if (tryCount === 0) {
                         tryCount += 1;
+
+                        console.log('///////// uncaughtException \\\\\\\\\\\\\\')
+
                         throw new Error('SOME EXCEPTION');
                     } else {
                         done(new Error('Callback was called twice'));
@@ -1030,7 +1038,7 @@ describe('Database', function () {
         });
     }); // ==== End of 'Find' ==== //
 
-    describe.skip('Count', function () {
+    describe('Count', function () {
         test('Count all documents if an empty query is used', function (done) {
             async.waterfall(
                 [
@@ -1117,8 +1125,8 @@ describe('Database', function () {
         test('Returns an error if the query is not well formed', function (done) {
             d.insert({hello: 'world'}, function () {
                 d.count({$or: {hello: 'world'}}, function (err, docs) {
-                    assert.isDefined(err);
-                    assert.isUndefined(docs);
+                    assert.equal(err instanceof Error, true);
+                    assert.equal(docs, undefined);
 
                     done();
                 });
@@ -1126,7 +1134,7 @@ describe('Database', function () {
         });
     });
 
-    describe.skip('Update', function () {
+    describe('Update', function () {
         test("If the query doesn't match anything, database is not modified", function (done) {
             async.waterfall(
                 [
@@ -1156,10 +1164,10 @@ describe('Database', function () {
                                         return d.somedata === 'another';
                                     });
                                 assert.equal(docs.length, 3);
-                                assert.isUndefined(
+                                assert.equal(
                                     _.find(docs, function (d) {
                                         return d.newDoc === 'yes';
-                                    })
+                                    }), undefined
                                 );
 
                                 assert.deepEqual(doc1, {_id: doc1._id, somedata: 'ok'});
@@ -1179,8 +1187,8 @@ describe('Database', function () {
             var beginning = Date.now();
             d = new Datastore({filename: testDb, autoload: true, timestampData: true});
             d.insert({hello: 'world'}, function (err, insertedDoc) {
-                assert.isBelow(insertedDoc.updatedAt.getTime() - beginning, reloadTimeUpperBound);
-                assert.isBelow(insertedDoc.createdAt.getTime() - beginning, reloadTimeUpperBound);
+                assert.equal(insertedDoc.updatedAt.getTime() - beginning < reloadTimeUpperBound, true);
+                assert.equal(insertedDoc.createdAt.getTime() - beginning < reloadTimeUpperBound, true);
                 assert.equal(Object.keys(insertedDoc).length, 4);
 
                 // Wait 100ms before performing the update
@@ -1193,8 +1201,8 @@ describe('Database', function () {
                             assert.equal(docs[0]._id, insertedDoc._id);
                             assert.equal(docs[0].createdAt, insertedDoc.createdAt);
                             assert.equal(docs[0].hello, 'mars');
-                            assert.isAbove(docs[0].updatedAt.getTime() - beginning, 99); // updatedAt modified
-                            assert.isBelow(docs[0].updatedAt.getTime() - step1, reloadTimeUpperBound); // updatedAt modified
+                            assert.equal(docs[0].updatedAt.getTime() - beginning> 99, true); // updatedAt modified
+                            assert.equal(docs[0].updatedAt.getTime() - step1 < reloadTimeUpperBound, true); // updatedAt modified
 
                             done();
                         });
@@ -1343,7 +1351,7 @@ describe('Database', function () {
                 d.update({impossible: 'db is empty anyway'}, {newDoc: true}, {}, function (err, nr, upsert) {
                     assert.equal(err, null);
                     assert.equal(nr, 0);
-                    assert.isUndefined(upsert);
+                    assert.equal(upsert, undefined);
 
                     d.find({}, function (err, docs) {
                         assert.equal(docs.length, 0); // Default option for upsert is false
@@ -1356,7 +1364,7 @@ describe('Database', function () {
                                 assert.equal(err, null);
                                 assert.equal(nr, 1);
                                 assert.equal(newDoc.something, 'created ok');
-                                assert.isDefined(newDoc._id);
+                                assert.notEqual(newDoc._id, undefined);
 
                                 d.find({}, function (err, docs) {
                                     assert.equal(docs.length, 1); // Default option for upsert is false
@@ -1366,7 +1374,7 @@ describe('Database', function () {
                                     newDoc.newField = true;
                                     d.find({}, function (err, docs) {
                                         assert.equal(docs[0].something, 'created ok');
-                                        assert.isUndefined(docs[0].newField);
+                                        assert.equal(docs[0].newField, undefined);
 
                                         done();
                                     });
@@ -1432,7 +1440,7 @@ describe('Database', function () {
 
             test('Performing upsert with badly formatted fields yields a standard error not an exception', function (done) {
                 d.update({_id: '1234'}, {$set: {$$badfield: 5}}, {upsert: true}, function (err, doc) {
-                    assert.isDefined(err);
+                    assert.equal(err instanceof Error, true);
                     done();
                 });
             });
@@ -1441,16 +1449,16 @@ describe('Database', function () {
         test('Cannot perform update if the update query is not either registered-modifiers-only or copy-only, or contain badly formatted fields', function (done) {
             d.insert({something: 'yup'}, function () {
                 d.update({}, {boom: {$badfield: 5}}, {multi: false}, function (err) {
-                    assert.isDefined(err);
+                    assert.equal(err instanceof Error, true);
 
                     d.update({}, {boom: {'bad.field': 5}}, {multi: false}, function (err) {
-                        assert.isDefined(err);
+                        assert.equal(err instanceof Error, true);
 
                         d.update({}, {$inc: {test: 5}, mixed: 'rrr'}, {multi: false}, function (err) {
-                            assert.isDefined(err);
+                            assert.equal(err instanceof Error, true);
 
                             d.update({}, {$inexistent: {test: 5}}, {multi: false}, function (err) {
-                                assert.isDefined(err);
+                                assert.equal(err instanceof Error, true);
 
                                 done();
                             });
@@ -1488,14 +1496,14 @@ describe('Database', function () {
                 assert.equal(nr, 1);
                 assert.equal(newDoc.bloup, 'blap');
                 assert.equal(newDoc.hello, 'world');
-                assert.isDefined(newDoc._id);
+                assert.notEqual(newDoc._id, undefined);
 
                 d.find({}, function (err, docs) {
                     assert.equal(docs.length, 1);
                     assert.equal(Object.keys(docs[0]).length, 3);
                     assert.equal(docs[0].hello, 'world');
                     assert.equal(docs[0].bloup, 'blap');
-                    assert.isDefined(docs[0]._id);
+                    assert.notEqual(docs[0]._id, undefined);
 
                     done();
                 });
@@ -1514,7 +1522,7 @@ describe('Database', function () {
                         d.update({}, {$set: {bloup: {blip: 'ola'}}}, {}, function () {
                             d.findOne({}, function (err, doc) {
                                 assert.equal(doc.bloup.blip, 'ola');
-                                assert.isUndefined(doc.bloup.other); // This information was lost
+                                assert.equal(doc.bloup.other, undefined); // This information was lost
 
                                 done();
                             });
@@ -1527,9 +1535,9 @@ describe('Database', function () {
         test('Returns an error if the query is not well formed', function (done) {
             d.insert({hello: 'world'}, function () {
                 d.update({$or: {hello: 'world'}}, {a: 1}, {}, function (err, nr, upsert) {
-                    assert.isDefined(err);
-                    assert.isUndefined(nr);
-                    assert.isUndefined(upsert);
+                    assert.equal(err instanceof Error, true);
+                    assert.equal(nr, undefined);
+                    assert.equal(upsert, undefined);
 
                     done();
                 });
@@ -1539,8 +1547,8 @@ describe('Database', function () {
         test('If an error is thrown by a modifier, the database state is not changed', function (done) {
             d.insert({hello: 'world'}, function (err, newDoc) {
                 d.update({}, {$inc: {hello: 4}}, {}, function (err, nr) {
-                    assert.isDefined(err);
-                    assert.isUndefined(nr);
+                    assert.equal(err instanceof Error, true);
+                    assert.equal(nr, undefined);
 
                     d.find({}, function (err, docs) {
                         assert.deepEqual(docs, [{_id: newDoc._id, hello: 'world'}]);
@@ -1554,7 +1562,7 @@ describe('Database', function () {
         test('Cant change the _id of a document', function (done) {
             d.insert({a: 2}, function (err, newDoc) {
                 d.update({a: 2}, {a: 2, _id: 'nope'}, {}, function (err) {
-                    assert.isDefined(err);
+                    assert.equal(err instanceof Error, true);
 
                     d.find({}, function (err, docs) {
                         assert.equal(docs.length, 1);
@@ -1563,7 +1571,7 @@ describe('Database', function () {
                         assert.equal(docs[0]._id, newDoc._id);
 
                         d.update({a: 2}, {$set: {_id: 'nope'}}, {}, function (err) {
-                            assert.isDefined(err);
+                            assert.equal(err instanceof Error, true);
 
                             d.find({}, function (err, docs) {
                                 assert.equal(docs.length, 1);
@@ -1689,7 +1697,7 @@ describe('Database', function () {
                     d.insert({a: 'abc'}, function (err, doc3) {
                         // With this query, candidates are always returned in the order 4, 5, 'abc' so it's always the last one which fails
                         d.update({a: {$in: [4, 5, 'abc']}}, {$inc: {a: 10}}, {multi: true}, function (err) {
-                            assert.isDefined(err);
+                            assert.equal(err instanceof Error, true);
 
                             // No index modified
                             _.each(d.indexes, function (index) {
@@ -1722,7 +1730,7 @@ describe('Database', function () {
                 d.insert({a: 5}, function (err, doc2) {
                     // With this query, candidates are always returned in the order 4, 5, 'abc' so it's always the last one which fails
                     d.update({a: {$in: [4, 5, 'abc']}}, {$set: {a: 10}}, {multi: true}, function (err) {
-                        assert.isDefined(err);
+                        assert.equal(err instanceof Error, true);
 
                         // Check that no index was modified
                         _.each(d.indexes, function (index) {
@@ -1803,14 +1811,14 @@ describe('Database', function () {
                     d2.update({a: 1}, {$set: {b: 2}}, {});
                     d2.findOne({a: 1}, function (err, doc) {
                         assert.equal(doc.createdAt.getTime(), createdAt);
-                        assert.isBelow(Date.now() - doc.updatedAt.getTime(), 5);
+                        assert.equal(Date.now() - doc.updatedAt.getTime()< 5, true);
 
                         // Complete replacement
                         setTimeout(function () {
                             d2.update({a: 1}, {c: 3}, {});
                             d2.findOne({c: 3}, function (err, doc) {
                                 assert.equal(doc.createdAt.getTime(), createdAt);
-                                assert.isBelow(Date.now() - doc.updatedAt.getTime(), 5);
+                                assert.equal(Date.now() - doc.updatedAt.getTime()< 5, true);
 
                                 done();
                             });
@@ -1829,8 +1837,8 @@ describe('Database', function () {
                 d.update({a: 1}, {$set: {b: 20}}, {}, function (err, numAffected, affectedDocuments, upsert) {
                     assert.equal(err, null);
                     assert.equal(numAffected, 1);
-                    assert.isUndefined(affectedDocuments);
-                    assert.isUndefined(upsert);
+                    assert.equal(affectedDocuments, undefined);
+                    assert.equal(upsert, undefined);
 
                     // returnUpdatedDocs set to true
                     d.update(
@@ -1842,7 +1850,7 @@ describe('Database', function () {
                             assert.equal(numAffected, 1);
                             assert.equal(affectedDocuments.a, 1);
                             assert.equal(affectedDocuments.b, 21);
-                            assert.isUndefined(upsert);
+                            assert.equal(upsert, undefined);
 
                             done();
                         }
@@ -1858,8 +1866,8 @@ describe('Database', function () {
                 d.update({}, {$set: {b: 20}}, {multi: true}, function (err, numAffected, affectedDocuments, upsert) {
                     assert.equal(err, null);
                     assert.equal(numAffected, 2);
-                    assert.isUndefined(affectedDocuments);
-                    assert.isUndefined(upsert);
+                    assert.equal(affectedDocuments, undefined);
+                    assert.equal(upsert, undefined);
 
                     // returnUpdatedDocs set to true
                     d.update(
@@ -1870,7 +1878,7 @@ describe('Database', function () {
                             assert.equal(err, null);
                             assert.equal(numAffected, 2);
                             assert.equal(affectedDocuments.length, 2);
-                            assert.isUndefined(upsert);
+                            assert.equal(upsert, undefined);
 
                             done();
                         }
@@ -1886,8 +1894,8 @@ describe('Database', function () {
                 d.update({a: 3}, {$set: {b: 20}}, {}, function (err, numAffected, affectedDocuments, upsert) {
                     assert.equal(err, null);
                     assert.equal(numAffected, 0);
-                    assert.isUndefined(affectedDocuments);
-                    assert.isUndefined(upsert);
+                    assert.equal(affectedDocuments, undefined);
+                    assert.equal(upsert, undefined);
 
                     // Upsert flag set
                     d.update(
@@ -1912,7 +1920,7 @@ describe('Database', function () {
         }); // ==== End of 'Update - Callback signature' ==== //
     }); // ==== End of 'Update' ==== //
 
-    describe.skip('Remove', function () {
+    describe('Remove', function () {
         test('Can remove multiple documents', function (done) {
             var id1, id2, id3;
 
@@ -1998,9 +2006,9 @@ describe('Database', function () {
         test('Returns an error if the query is not well formed', function (done) {
             d.insert({hello: 'world'}, function () {
                 d.remove({$or: {hello: 'world'}}, {}, function (err, nr, upsert) {
-                    assert.isDefined(err);
-                    assert.isUndefined(nr);
-                    assert.isUndefined(upsert);
+                    assert.equal(err instanceof Error, true);
+                    assert.equal(nr, undefined);
+                    assert.equal(upsert, undefined);
 
                     done();
                 });
@@ -2091,7 +2099,7 @@ describe('Database', function () {
                                         return doc._id === doc3._id;
                                     });
                                 assert.equal(d1.a, 1);
-                                assert.isUndefined(d2);
+                                assert.equal(d2, undefined);
                                 assert.equal(d3.a, 5);
 
                                 done();
@@ -2103,7 +2111,7 @@ describe('Database', function () {
         });
     }); // ==== End of 'Remove' ==== //
 
-    describe.skip('Using indexes', function () {
+    describe('Using indexes', function () {
         describe('ensureIndex and index initialization in database loading', function () {
             test('ensureIndex can be called right after a loadDatabase and be initialized and filled correctly', function (done) {
                 var now = new Date(),
@@ -2382,7 +2390,7 @@ describe('Database', function () {
                     d.removeIndex('e', function (err) {
                         assert.equal(err, null);
                         assert.equal(Object.keys(d.indexes).length, 1);
-                        assert.isUndefined(d.indexes.e);
+                        assert.equal(d.indexes.e, undefined);
 
                         done();
                     });
@@ -2513,7 +2521,7 @@ describe('Database', function () {
 
                     d.insert({a: 5, z: 'other'}, function (err) {
                         assert.equal(err.errorType, 'uniqueViolated');
-                        assert.isUndefined(err.key);
+                        assert.equal(err.key, undefined);
 
                         d.ensureIndex({fieldName: 'yyy', unique: true, sparse: true});
 
@@ -2582,7 +2590,7 @@ describe('Database', function () {
 
                 d.insert({a: 1, b: 'hello'}, function (err, doc1) {
                     d.insert({a: 1, b: 'si'}, function (err) {
-                        assert.isDefined(err);
+                        assert.equal(err instanceof Error, true);
 
                         d.find({}, function (err, docs) {
                             assert.equal(docs.length, 1);
@@ -2683,8 +2691,8 @@ describe('Database', function () {
 
                                 assert.equal(d.indexes.b.tree.getNumberOfKeys(), 1);
                                 assert.equal(d.indexes.b.getMatching('same').length, 2);
-                                assert(_.pluck(d.indexes.b.getMatching('same'), '_id').contains(doc1._id), true);
-                                assert(_.pluck(d.indexes.b.getMatching('same'), '_id').contains(doc2._id), true);
+                                assert.equal(_.pluck(d.indexes.b.getMatching('same'), '_id').includes(doc1._id), true);
+                                assert.equal(_.pluck(d.indexes.b.getMatching('same'), '_id').includes(doc2._id), true);
 
                                 // The same pointers are shared between all indexes
                                 assert.equal(d.indexes.a.tree.getNumberOfKeys(), 2);
