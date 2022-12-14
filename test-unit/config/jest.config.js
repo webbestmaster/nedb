@@ -8,7 +8,7 @@ module.exports = {
     rootDir: '../../',
     setupFilesAfterEnv: [],
     testEnvironment: 'node',
-    // maxConcurrency: 1,
-    // maxWorkers: 1,
+    maxConcurrency: 1,
+    maxWorkers: 1,
     testTimeout: 10e3,
 };
