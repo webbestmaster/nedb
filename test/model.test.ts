@@ -34,10 +34,11 @@ describe('Model', function () {
             a = {test: 'With a new\nline'};
             b = model.serialize(a);
             c = model.deserialize(b);
+
             assert.equal(c.test, 'With a new\nline');
-            a.test.indexOf('\n').should.not.equal(-1);
+            assert.equal(a.test.includes('\n'), true);
             assert.equal(b.indexOf('\n'), -1);
-            c.test.indexOf('\n').should.not.equal(-1);
+            assert.equal(c.test.includes('\n'), true);
         });
 
         test('Can serialize and deserialize booleans', function () {
@@ -67,7 +68,7 @@ describe('Model', function () {
             b = model.serialize(a);
             c = model.deserialize(b);
             assert.equal(b.indexOf('\n'), -1);
-            assert.isNull(a.test);
+            assert.equal(a.test, null);
         });
 
         test('undefined fields are removed when serialized', function () {
@@ -76,7 +77,7 @@ describe('Model', function () {
                 c = model.deserialize(b);
             assert.equal(Object.keys(c).length, 1);
             assert.equal(c.hello, 'world');
-            assert.isUndefined(c.bloup);
+            assert.equal(c.bloup, undefined);
         });
 
         test('Can serialize and deserialize a date', function () {
@@ -134,12 +135,12 @@ describe('Model', function () {
                 b;
 
             // Normal cases
-            (function () {
+            assert.throws(function () {
                 b = model.serialize(a1);
-            }.should.throw());
-            (function () {
+            });
+            assert.throws(function () {
                 b = model.serialize(a2);
-            }.should.throw());
+            });
 
             // Edge cases
             b = model.serialize(e1);
@@ -159,15 +160,15 @@ describe('Model', function () {
             db1 = new Datastore({filename: 'workspace/test1.db'});
 
             db1.loadDatabase(function (err) {
-                assert.isNull(err);
+                assert.equal(err, null);
                 db1.insert({hello: badString}, function (err) {
-                    assert.isNull(err);
+                    assert.equal(err, null);
 
                     db2 = new Datastore({filename: 'workspace/test1.db'});
                     db2.loadDatabase(function (err) {
-                        assert.isNull(err);
+                        assert.equal(err, null);
                         db2.find({}, function (err, docs) {
-                            assert.isNull(err);
+                            assert.equal(err, null);
                             assert.equal(docs.length, 1);
                             assert.equal(docs[0].hello, badString);
 
@@ -187,30 +188,30 @@ describe('Model', function () {
 
     describe('Object checking', function () {
         test('Field names beginning with a $ sign are forbidden', function () {
-            assert.isDefined(model.checkObject);
+            assert.notEqual(typeof model.checkObject, 'undefined');
 
-            (function () {
+            assert.throws(function () {
                 model.checkObject({$bad: true});
-            }.should.throw());
+            });
 
-            (function () {
+            assert.throws(function () {
                 model.checkObject({some: 42, nested: {again: 'no', $worse: true}});
-            }.should.throw());
+            });
 
             // This shouldn't throw since "$actuallyok" is not a field name
             model.checkObject({some: 42, nested: [5, 'no', '$actuallyok', true]});
 
-            (function () {
+            assert.throws(function () {
                 model.checkObject({some: 42, nested: [5, 'no', '$actuallyok', true, {$hidden: 'useless'}]});
-            }.should.throw());
+            });
         });
 
         test('Field names cannot contain a .', function () {
-            assert.isDefined(model.checkObject);
+            assert.notEqual(typeof model.checkObject, 'undefined');
 
-            (function () {
+            assert.throws(function () {
                 model.checkObject({'so.bad': true});
-            }.should.throw());
+            });
 
             // Recursive behaviour testing done in the above test on $ signs
         });
@@ -310,16 +311,16 @@ describe('Model', function () {
             assert.equal(t.bloup[0], 1);
             assert.equal(t.bloup[1], 8);
 
-            assert.isUndefined(t.some);
+            assert.equal(t.some, undefined);
             assert.equal(t._id, 'keepit');
         });
 
         test('Throw an error if trying to change the _id field in a copy-type modification', function () {
             var obj = {some: 'thing', _id: 'keepit'},
                 updateQuery = {replace: 'done', bloup: [1, 8], _id: 'donttryit'};
-            expect(function () {
+            assert.throws(function () {
                 model.modify(obj, updateQuery);
-            }).to.throw("You cannot change a document's _id");
+            }, /You cannot change a document's _id/);
 
             updateQuery._id = 'keepit';
             model.modify(obj, updateQuery); // No error thrown
@@ -329,27 +330,27 @@ describe('Model', function () {
             var obj = {some: 'thing'},
                 updateQuery = {replace: 'me', $modify: 'metoo'};
 
-            expect(function () {
+            assert.throws(function () {
                 model.modify(obj, updateQuery);
-            }).to.throw('You cannot mix modifiers and normal fields');
+            }, /You cannot mix modifiers and normal fields/);
         });
 
         test('Throw an error if trying to use an inexistent modifier', function () {
             var obj = {some: 'thing'},
                 updateQuery = {$set: {it: 'exists'}, $modify: 'not this one'};
 
-            expect(function () {
+            assert.throws(function () {
                 model.modify(obj, updateQuery);
-            }).to.throw(/^Unknown modifier .modify/);
+            }, /Unknown modifier \$modify/);
         });
 
         test('Throw an error if a modifier is used with a non-object argument', function () {
             var obj = {some: 'thing'},
                 updateQuery = {$set: 'this exists'};
 
-            expect(function () {
+            assert.throws(function () {
                 model.modify(obj, updateQuery);
-            }).to.throw(/Modifier .set's argument must be an object/);
+            }, /Modifier \$set's argument must be an object/);
         });
 
         describe('$set modifier', function () {
@@ -462,17 +463,17 @@ describe('Model', function () {
 
         describe('$inc modifier', function () {
             test('Throw an error if you try to use it with a non-number or on a non number field', function () {
-                (function () {
+                assert.throws(function () {
                     var obj = {some: 'thing', yup: 'yes', nay: 2},
                         updateQuery = {$inc: {nay: 'notanumber'}},
                         modified = model.modify(obj, updateQuery);
-                }.should.throw());
+                });
 
-                (function () {
+                assert.throws(function () {
                     var obj = {some: 'thing', yup: 'yes', nay: 'nope'},
                         updateQuery = {$inc: {nay: 1}},
                         modified = model.modify(obj, updateQuery);
-                }.should.throw());
+                });
             });
 
             test('Can increment number fields or create and initialize them if needed', function () {
@@ -529,14 +530,14 @@ describe('Model', function () {
                 var obj = {arr: 'hello'},
                     modified;
 
-                (function () {
+                assert.throws(function () {
                     modified = model.modify(obj, {$push: {arr: 'world'}});
-                }.should.throw());
+                });
 
                 obj = {arr: {nested: 45}};
-                (function () {
+                assert.throws(function () {
                     modified = model.modify(obj, {$push: {'arr.nested': 'world'}});
-                }.should.throw());
+                });
             });
 
             test('Can use the $each modifier to add multiple values to an array at once', function () {
@@ -546,13 +547,13 @@ describe('Model', function () {
                 modified = model.modify(obj, {$push: {arr: {$each: ['world', 'earth', 'everything']}}});
                 assert.deepEqual(modified, {arr: ['hello', 'world', 'earth', 'everything']});
 
-                (function () {
+                assert.throws(function () {
                     modified = model.modify(obj, {$push: {arr: {$each: 45}}});
-                }.should.throw());
+                });
 
-                (function () {
+                assert.throws(function () {
                     modified = model.modify(obj, {$push: {arr: {$each: ['world'], unauthorized: true}}});
-                }.should.throw());
+                });
             });
 
             test('Can use the $slice modifier to limit the number of array elements', function () {
@@ -587,13 +588,13 @@ describe('Model', function () {
                 modified = model.modify(obj, {$push: {arr: {$slice: 1}}});
                 assert.deepEqual(modified, {arr: ['hello']});
 
-                (function () {
+                assert.throws(function () {
                     modified = model.modify(obj, {$push: {arr: {$slice: 1, unauthorized: true}}});
-                }.should.throw());
+                });
 
-                (function () {
+                assert.throws(function () {
                     modified = model.modify(obj, {$push: {arr: {$each: [], unauthorized: true}}});
-                }.should.throw());
+                });
             });
         }); // End of '$push modifier'
 
@@ -622,9 +623,9 @@ describe('Model', function () {
                 var obj = {arr: 'hello'},
                     modified;
 
-                (function () {
+                assert.throws(function () {
                     modified = model.modify(obj, {$addToSet: {arr: 'world'}});
-                }.should.throw());
+                });
             });
 
             test('Use deep-equality to check whether we can add a value to a set', function () {
@@ -646,13 +647,13 @@ describe('Model', function () {
                 modified = model.modify(obj, {$addToSet: {arr: {$each: ['world', 'earth', 'hello', 'earth']}}});
                 assert.deepEqual(modified, {arr: ['hello', 'world', 'earth']});
 
-                (function () {
+                assert.throws(function () {
                     modified = model.modify(obj, {$addToSet: {arr: {$each: 45}}});
-                }.should.throw());
+                });
 
-                (function () {
+                assert.throws(function () {
                     modified = model.modify(obj, {$addToSet: {arr: {$each: ['world'], unauthorized: true}}});
-                }.should.throw());
+                });
             });
         }); // End of '$addToSet modifier'
 
@@ -661,19 +662,19 @@ describe('Model', function () {
                 var obj = {arr: 'hello'},
                     modified;
 
-                (function () {
+                assert.throws(function () {
                     modified = model.modify(obj, {$pop: {arr: 1}});
-                }.should.throw());
+                });
 
                 obj = {bloup: 'nope'};
-                (function () {
+                assert.throws(function () {
                     modified = model.modify(obj, {$pop: {arr: 1}});
-                }.should.throw());
+                });
 
                 obj = {arr: [1, 4, 8]};
-                (function () {
+                assert.throws(function () {
                     modified = model.modify(obj, {$pop: {arr: true}});
-                }.should.throw());
+                });
             });
 
             test('Can remove the first and last element of an array', function () {
@@ -721,9 +722,9 @@ describe('Model', function () {
                 var obj = {arr: 'hello'},
                     modified;
 
-                (function () {
+                assert.throws(function () {
                     modified = model.modify(obj, {$pull: {arr: 'world'}});
-                }.should.throw());
+                });
             });
 
             test('Use deep-equality to check whether we can remove a value from a set', function () {
@@ -757,8 +758,8 @@ describe('Model', function () {
                     updateQuery = {$max: {number: 12}},
                     modified = model.modify(obj, updateQuery);
 
-                modified.should.deep.equal({some: 'thing', number: 12});
-                obj.should.deep.equal({some: 'thing', number: 10});
+                assert.deepEqual(modified, {some: 'thing', number: 12});
+                assert.deepEqual(obj, {some: 'thing', number: 10});
             });
 
             test('Will not update the field if new value is smaller than current one', function () {
@@ -766,7 +767,7 @@ describe('Model', function () {
                     updateQuery = {$max: {number: 9}},
                     modified = model.modify(obj, updateQuery);
 
-                modified.should.deep.equal({some: 'thing', number: 10});
+                assert.deepEqual(modified, {some: 'thing', number: 10});
             });
 
             test('Will create the field if it does not exist', function () {
@@ -774,7 +775,7 @@ describe('Model', function () {
                     updateQuery = {$max: {number: 10}},
                     modified = model.modify(obj, updateQuery);
 
-                modified.should.deep.equal({some: 'thing', number: 10});
+                assert.deepEqual(modified, {some: 'thing', number: 10});
             });
 
             test('Works on embedded documents', function () {
@@ -782,7 +783,7 @@ describe('Model', function () {
                     updateQuery = {$max: {'somethingElse.number': 12}},
                     modified = model.modify(obj, updateQuery);
 
-                modified.should.deep.equal({some: 'thing', somethingElse: {number: 12}});
+                assert.deepEqual(modified, {some: 'thing', somethingElse: {number: 12}});
             });
         }); // End of '$max modifier'
 
@@ -792,8 +793,8 @@ describe('Model', function () {
                     updateQuery = {$min: {number: 8}},
                     modified = model.modify(obj, updateQuery);
 
-                modified.should.deep.equal({some: 'thing', number: 8});
-                obj.should.deep.equal({some: 'thing', number: 10});
+                assert.deepEqual(modified, {some: 'thing', number: 8});
+                assert.deepEqual(obj, {some: 'thing', number: 10});
             });
 
             test('Will not update the field if new value is greater than current one', function () {
@@ -801,7 +802,7 @@ describe('Model', function () {
                     updateQuery = {$min: {number: 12}},
                     modified = model.modify(obj, updateQuery);
 
-                modified.should.deep.equal({some: 'thing', number: 10});
+                assert.deepEqual(modified, {some: 'thing', number: 10});
             });
 
             test('Will create the field if it does not exist', function () {
@@ -809,7 +810,7 @@ describe('Model', function () {
                     updateQuery = {$min: {number: 10}},
                     modified = model.modify(obj, updateQuery);
 
-                modified.should.deep.equal({some: 'thing', number: 10});
+                assert.deepEqual(modified, {some: 'thing', number: 10});
             });
 
             test('Works on embedded documents', function () {
@@ -817,7 +818,7 @@ describe('Model', function () {
                     updateQuery = {$min: {'somethingElse.number': 8}},
                     modified = model.modify(obj, updateQuery);
 
-                modified.should.deep.equal({some: 'thing', somethingElse: {number: 8}});
+                assert.deepEqual(modified, {some: 'thing', somethingElse: {number: 8}});
             });
         }); // End of '$min modifier'
     }); // ==== End of 'Modifying documents' ==== //
@@ -1052,8 +1053,8 @@ describe('Model', function () {
             });
 
             test('Return undefined if the field cannot be found in the object', function () {
-                assert.isUndefined(model.getDotValue({hello: 'world'}, 'helloo'));
-                assert.isUndefined(model.getDotValue({hello: 'world', type: {planet: true}}, 'type.plane'));
+                assert.equal(model.getDotValue({hello: 'world'}, 'helloo'), undefined);
+                assert.equal(model.getDotValue({hello: 'world', type: {planet: true}}, 'type.plane'), undefined);
             });
 
             test('Can navigate inside arrays with dot notation, and return the array of values in that case', function () {
@@ -1133,7 +1134,7 @@ describe('Model', function () {
                     },
                     'planets.3'
                 );
-                assert.isUndefined(dv);
+                assert.equal(dv, undefined);
 
                 // Index in nested array
                 dv = model.getDotValue(
@@ -1193,9 +1194,9 @@ describe('Model', function () {
                 assert.equal(model.match({a: {b: 5, c: 3}}, {a: {b: 5}}), false);
 
                 assert.equal(model.match({a: {b: 5}}, {a: {b: {$lt: 10}}}), false);
-                (function () {
+                assert.throws(function () {
                     model.match({a: {b: 5}}, {a: {$or: [{b: 10}, {b: 5}]}});
-                }.should.throw());
+                });
             });
 
             test('Can match for field equality inside an array with the dot notation', function () {
@@ -1231,13 +1232,13 @@ describe('Model', function () {
             });
 
             test('Will throw if $regex operator is used with a non regex value', function () {
-                (function () {
+                assert.throws(function () {
                     model.match({test: 'true'}, {test: {$regex: 42}});
-                }.should.throw());
+                });
 
-                (function () {
+                assert.throws(function () {
                     model.match({test: 'true'}, {test: {$regex: 'true'}});
-                }.should.throw());
+                });
             });
 
             test('Can use the $regex operator in cunjunction with other operators', function () {
@@ -1325,9 +1326,9 @@ describe('Model', function () {
                 assert.equal(model.match({a: 8}, {a: {$in: [6, 8, 9]}}), true);
                 assert.equal(model.match({a: 9}, {a: {$in: [6, 8, 9]}}), true);
 
-                (function () {
+                assert.throws(function () {
                     model.match({a: 5}, {a: {$in: 5}});
-                }.should.throw());
+                });
             });
 
             test('$nin', function () {
@@ -1340,9 +1341,9 @@ describe('Model', function () {
                 // Matches if field doesn't exist
                 assert.equal(model.match({a: 9}, {b: {$nin: [6, 8, 9]}}), true);
 
-                (function () {
+                assert.throws(function () {
                     model.match({a: 5}, {a: {$in: 5}});
-                }.should.throw());
+                });
             });
 
             test('$exists', function () {
@@ -1533,15 +1534,15 @@ describe('Model', function () {
             });
 
             test('Should throw an error if a query operator is used without comparing to an integer', function () {
-                (function () {
+                assert.throws(function () {
                     model.match({a: [1, 5]}, {a: {$size: 1.4}});
-                }.should.throw());
-                (function () {
+                });
+                assert.throws(function () {
                     model.match({a: [1, 5]}, {a: {$size: 'fdf'}});
-                }.should.throw());
-                (function () {
+                });
+                assert.throws(function () {
                     model.match({a: [1, 5]}, {a: {$size: {$lt: 5}}});
-                }.should.throw());
+                });
             });
 
             test('Using $size operator on a non-array field should prevent match but not throw', function () {
@@ -1745,9 +1746,9 @@ describe('Model', function () {
             });
 
             test('Logical operators are all top-level, only other logical operators can be above', function () {
-                (function () {
+                assert.throws(function () {
                     model.match({a: {b: 7}}, {a: {$or: [{b: 5}, {b: 7}]}});
-                }.should.throw());
+                });
                 assert.equal(model.match({a: {b: 7}}, {$or: [{'a.b': 5}, {'a.b': 7}]}), true);
             });
 
@@ -1769,15 +1770,15 @@ describe('Model', function () {
             });
 
             test('Should throw an error if a logical operator is used without an array or if an unknown logical operator is used', function () {
-                (function () {
+                assert.throws(function () {
                     model.match({a: 5}, {$or: {a: 5, a: 6}});
-                }.should.throw());
-                (function () {
+                });
+                assert.throws(function () {
                     model.match({a: 5}, {$and: {a: 5, a: 6}});
-                }.should.throw());
-                (function () {
+                });
+                assert.throws(function () {
                     model.match({a: 5}, {$unknown: [{a: 5}]});
-                }.should.throw());
+                });
             });
         });
 
@@ -1808,13 +1809,13 @@ describe('Model', function () {
             });
 
             test('Should throw an error if the $where function is not, in fact, a function', function () {
-                (function () {
+                assert.throws(function () {
                     model.match({a: 4}, {$where: 'not a function'});
-                }.should.throw());
+                });
             });
 
             test('Should throw an error if the $where function returns a non-boolean', function () {
-                (function () {
+                assert.throws(function () {
                     model.match(
                         {a: 4},
                         {
@@ -1823,7 +1824,7 @@ describe('Model', function () {
                             },
                         }
                     );
-                }.should.throw());
+                });
             });
 
             test('Should be able to do the complex matching it must be used for', function () {
