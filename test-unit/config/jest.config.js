@@ -11,5 +11,6 @@ module.exports = {
     maxConcurrency: 1,
     maxWorkers: 1,
     testTimeout: 10e3,
+    injectGlobals: false
     // bail: true, // stop after first failing test
 };
