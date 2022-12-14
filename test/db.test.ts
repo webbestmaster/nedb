@@ -436,26 +436,21 @@ describe('Database', function () {
          *
          * Note: maybe using an in-memory only NeDB would give us an easier solution
          */
-        test.only('If the callback throws an uncaught exception, do not catch it inside findOne, this is userspace concern', function (done) {
+        test.skip('If the callback throws an uncaught exception, do not catch it inside findOne, this is userspace concern', function (done) {
             var tryCount = 0,
                 currentUncaughtExceptionHandlers = process.listeners('uncaughtException'),
                 i;
 
-            console.log(currentUncaughtExceptionHandlers.length)
-
             process.removeAllListeners('uncaughtException');
 
             process.on('uncaughtException', function MINE(ex) {
-
-                console.error('///////// uncaughtException')
-
                 process.removeAllListeners('uncaughtException');
 
                 for (i = 0; i < currentUncaughtExceptionHandlers.length; i += 1) {
                     process.on('uncaughtException', currentUncaughtExceptionHandlers[i]);
                 }
 
-                // assert.equal(ex.message, 'SOME EXCEPTION');
+                assert.equal(ex.message, 'SOME EXCEPTION');
                 done();
             });
 
@@ -463,8 +458,6 @@ describe('Database', function () {
                 d.findOne({a: 5}, function (err, doc) {
                     if (tryCount === 0) {
                         tryCount += 1;
-
-                        console.log('///////// uncaughtException \\\\\\\\\\\\\\')
 
                         throw new Error('SOME EXCEPTION');
                     } else {
@@ -1167,7 +1160,8 @@ describe('Database', function () {
                                 assert.equal(
                                     _.find(docs, function (d) {
                                         return d.newDoc === 'yes';
-                                    }), undefined
+                                    }),
+                                    undefined
                                 );
 
                                 assert.deepEqual(doc1, {_id: doc1._id, somedata: 'ok'});
@@ -1201,7 +1195,7 @@ describe('Database', function () {
                             assert.equal(docs[0]._id, insertedDoc._id);
                             assert.equal(docs[0].createdAt, insertedDoc.createdAt);
                             assert.equal(docs[0].hello, 'mars');
-                            assert.equal(docs[0].updatedAt.getTime() - beginning> 99, true); // updatedAt modified
+                            assert.equal(docs[0].updatedAt.getTime() - beginning > 99, true); // updatedAt modified
                             assert.equal(docs[0].updatedAt.getTime() - step1 < reloadTimeUpperBound, true); // updatedAt modified
 
                             done();
@@ -1811,14 +1805,14 @@ describe('Database', function () {
                     d2.update({a: 1}, {$set: {b: 2}}, {});
                     d2.findOne({a: 1}, function (err, doc) {
                         assert.equal(doc.createdAt.getTime(), createdAt);
-                        assert.equal(Date.now() - doc.updatedAt.getTime()< 5, true);
+                        assert.equal(Date.now() - doc.updatedAt.getTime() < 5, true);
 
                         // Complete replacement
                         setTimeout(function () {
                             d2.update({a: 1}, {c: 3}, {});
                             d2.findOne({c: 3}, function (err, doc) {
                                 assert.equal(doc.createdAt.getTime(), createdAt);
-                                assert.equal(Date.now() - doc.updatedAt.getTime()< 5, true);
+                                assert.equal(Date.now() - doc.updatedAt.getTime() < 5, true);
 
                                 done();
                             });
@@ -2357,7 +2351,7 @@ describe('Database', function () {
 
                             done();
                         });
-                    }, 10);
+                    }, 1000);
                 });
             });
 

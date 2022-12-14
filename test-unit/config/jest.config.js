@@ -10,6 +10,6 @@ module.exports = {
     testEnvironment: 'node',
     maxConcurrency: 1,
     maxWorkers: 1,
-    testTimeout: 3e3,
-    bail: true, // stop after first failing test
+    testTimeout: 10e3,
+    // bail: true, // stop after first failing test
 };
