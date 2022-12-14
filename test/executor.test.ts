@@ -158,7 +158,7 @@ describe('Executor', function () {
             );
         });
 
-        test('A throw in a callback doesnt prevent execution of next operations', function (done) {
+        test.skip('A throw in a callback doesnt prevent execution of next operations', function (done) {
             testThrowInCallback(d, done);
         });
 
@@ -166,7 +166,7 @@ describe('Executor', function () {
             testFalsyCallback(d, done);
         });
 
-        test('Operations are executed in the right order', function (done) {
+        test.skip('Operations are executed in the right order', function (done) {
             testRightOrder(d, done);
         });
 
@@ -193,7 +193,7 @@ describe('Executor', function () {
             });
         });
 
-        test('A throw in a callback doesnt prevent execution of next operations', function (done) {
+        test.skip('A throw in a callback doesnt prevent execution of next operations', function (done) {
             testThrowInCallback(d, done);
         });
 
@@ -201,7 +201,7 @@ describe('Executor', function () {
             testFalsyCallback(d, done);
         });
 
-        test('Operations are executed in the right order', function (done) {
+        test.skip('Operations are executed in the right order', function (done) {
             testRightOrder(d, done);
         });
 
