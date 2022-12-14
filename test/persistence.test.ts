@@ -379,14 +379,14 @@ describe('Persistence', function () {
 
                 assert.throws(() => {
                     new Datastore({filename: hookTestFilename, autoload: true, afterSerialization: theAs});
-                })
+                });
 
                 // Data file left untouched
                 assert.equal(fs.readFileSync(hookTestFilename, 'utf8'), 'Some content');
 
                 assert.throws(() => {
                     new Datastore({filename: hookTestFilename, autoload: true, beforeDeserialization: theBd});
-                })
+                });
 
                 // Data file left untouched
                 assert.equal(fs.readFileSync(hookTestFilename, 'utf8'), 'Some content');
@@ -401,7 +401,6 @@ describe('Persistence', function () {
             storage.ensureFileDoesntExist(hookTestFilename, function () {
                 fs.writeFileSync(hookTestFilename, 'Some content', 'utf8');
 
-
                 assert.throws(() => {
                     new Datastore({
                         filename: hookTestFilename,
@@ -411,7 +410,7 @@ describe('Persistence', function () {
                             return s;
                         },
                     });
-                })
+                });
 
                 // Data file left untouched
                 assert.equal(fs.readFileSync(hookTestFilename, 'utf8'), 'Some content');
@@ -608,7 +607,7 @@ describe('Persistence', function () {
         test('Creating a persistent datastore with a bad filename will cause an error', function () {
             assert.throws(() => {
                 new Datastore({filename: 'workspace/bad.db~'});
-            })
+            });
         });
 
         test('If no file exists, ensureDatafileIntegrity creates an empty datafile', function (done) {
