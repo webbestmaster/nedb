@@ -13,11 +13,11 @@ const config: Config = {
     maxWorkers: 1,
     testTimeout: 10e3,
     injectGlobals: false,
-    bail: true, // stop after first failing test
+    bail: false, // true - stop after first failing test
     silent: true,
     passWithNoTests: true,
     errorOnDeprecated: true,
-    collectCoverage: false
+    collectCoverage: false,
 };
 
 export default config;

@@ -6,10 +6,10 @@ import path from 'path';
 import {describe, test, beforeEach} from '@jest/globals';
 import _ from 'underscore';
 import async from 'async';
-import model from './../lib/model';
-import Datastore from '../lib/datastore';
-import Persistence from '../lib/persistence';
-import Cursor from '../lib/cursor';
+import * as model from './../src/model';
+import {Datastore} from '../src/datastore';
+import {Persistence} from '../src/persistence';
+import {Cursor} from '../src/cursor';
 
 const testDb = 'workspace/test.db';
 

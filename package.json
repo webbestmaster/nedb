@@ -68,9 +68,9 @@
     "tsc": "tsc -p ./tsconfig.json",
     "tsc:watch": "tsc -p ./tsconfig.json --watch",
     "ts-coverage": "typescript-coverage-report --threshold=100 --strict=true --project ./src",
-    "test:unit": "jest --config='test-unit/config/jest.config.ts' ./test/cursor.test.ts ./test/customUtil.test.ts ./test/db.test.ts ./test/executor.test.ts ./test/indexes.test.ts ./test/model.test.ts ./test/persistence.test.ts --runInBand",
-    "test:watch": "jest --config='test-unit/config/jest.config.js' ./test/---.test.ts --watch",
-    "test:one": "jest --config='test-unit/config/jest.config.js' ./test/---.test.ts",
+    "test:unit": "jest --config='test-unit/config/jest.config.ts' ./test-ts/ --runInBand",
+    "test:unit-one": "jest --config='test-unit/config/jest.config.ts' ./test-ts/---.test.ts",
+    "test:unit-one-watch": "jest --config='test-unit/config/jest.config.ts' ./test-ts/---.test.ts --watch",
 
     "__old__test": "mocha --reporter spec --timeout 10000",
     "__old__test-one": "mocha --reporter spec --timeout 10000 ./test_lac/loadAndCrash.test.js"

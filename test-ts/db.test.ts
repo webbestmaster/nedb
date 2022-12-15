@@ -6,9 +6,9 @@ import path from 'path';
 import {describe, test, beforeEach} from '@jest/globals';
 import _ from 'underscore';
 import async from 'async';
-import model from './../lib/model';
-import Datastore from '../lib/datastore';
-import Persistence from '../lib/persistence';
+import * as model from './../src/model';
+import {Datastore} from '../src/datastore';
+import {Persistence} from '../src/persistence';
 
 const reloadTimeUpperBound = 60; // In ms, an upper bound for the reload time used to check createdAt and updatedAt
 const testDb = 'workspace/test.db';
