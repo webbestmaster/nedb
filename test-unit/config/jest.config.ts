@@ -17,7 +17,7 @@ const config: Config = {
     silent: true,
     passWithNoTests: true,
     errorOnDeprecated: true,
-    collectCoverage: true
+    collectCoverage: false
 };
 
 export default config;
