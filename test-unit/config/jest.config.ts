@@ -1,5 +1,6 @@
-// eslint-disable-next-line unicorn/prefer-module
-module.exports = {
+import type {Config} from 'jest';
+
+const config: Config = {
     moduleNameMapper: {
         '^\\S+.(css|styl|less|sass|scss|png|jpg|ttf|woff|woff2)$': 'jest-transform-stub',
     },
@@ -11,6 +12,11 @@ module.exports = {
     maxConcurrency: 1,
     maxWorkers: 1,
     testTimeout: 10e3,
-    injectGlobals: false
-    // bail: true, // stop after first failing test
+    injectGlobals: false,
+    bail: true, // stop after first failing test
+    silent: true,
+    passWithNoTests: true,
+    errorOnDeprecated: true,
 };
+
+export default config;
