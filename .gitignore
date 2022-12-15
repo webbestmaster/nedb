@@ -21,3 +21,9 @@ browser-version/node_modules
 *.swp
 *~
 *.swo
+
+
+# report
+/coverage-ts/
+/tsc-check/
+/coverage/
