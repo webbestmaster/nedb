@@ -9,7 +9,7 @@ import async from 'async';
 import model from './../src/model';
 import Datastore from '../src/datastore';
 import Persistence from '../src/persistence';
-import {customUtils} from '../src/customUtils';
+import * as customUtils from '../src/customUtils';
 import Cursor from '../src/cursor';
 
 const testDb = 'workspace/test.db';
